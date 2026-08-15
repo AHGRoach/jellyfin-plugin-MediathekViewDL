@@ -27,7 +27,7 @@ public class PluginController : ControllerBase
         string msg = Plugin.Instance.InitializationException.Message;
         if (string.IsNullOrWhiteSpace(msg))
         {
-            msg = "Ein unbekannter Fehler während der Initialisierung ist aufgetreten.";
+            msg = "An unknown error occurred during initialization.";
         }
 
         return Ok(msg);

@@ -32,7 +32,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public override string Name => "Mediathek Downloader";
 
     /// <inheritdoc />
-    public override string Description => "Sucht und lädt Inhalte aus den Mediatheken über die MediathekViewWeb-API.";
+    public override string Description => "Searches and downloads content from public media libraries using the MediathekViewWeb API.";
 
     /// <inheritdoc />
     public override Guid Id => Guid.Parse("a31b415a-5264-419d-b152-8c8192a54994");

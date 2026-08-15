@@ -36,13 +36,13 @@ public class TempFileCleanup : IScheduledTask
     }
 
     /// <inheritdoc />
-    public string Name => "Temporäre Dateien Bereinigen";
+    public string Name => "Clean Temporary Files";
 
     /// <inheritdoc />
     public string Key => "MediathekTempFileCleanup";
 
     /// <inheritdoc />
-    public string Description => "Löscht vom Plugin erstellte Temporäre Dateien (*.mvdl-tmp) bei Plugin start.";
+    public string Description => "Deletes temporary files (*.mvdl-tmp) created by the plugin at startup.";
 
     /// <inheritdoc />
     public string Category => Constants.SchedTaskCat;

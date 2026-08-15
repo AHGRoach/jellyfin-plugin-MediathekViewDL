@@ -13,12 +13,12 @@ const expandedActive = ref(new Set())
 let refreshInterval = null
 
 const statusMap = {
-  'Queued': { label: 'In Warteschlange', class: 'status-queued' },
-  'Downloading': { label: 'Wird heruntergeladen', class: 'status-downloading' },
-  'Processing': { label: 'Wird verarbeitet', class: 'status-processing' },
-  'Finished': { label: 'Abgeschlossen', class: 'status-finished' },
-  'Failed': { label: 'Fehlgeschlagen', class: 'status-failed' },
-  'Cancelled': { label: 'Abgebrochen', class: 'status-cancelled' }
+  'Queued': { label: 'Queued', class: 'status-queued' },
+  'Downloading': { label: 'Downloading', class: 'status-downloading' },
+  'Processing': { label: 'Processing', class: 'status-processing' },
+  'Finished': { label: 'Finished', class: 'status-finished' },
+  'Failed': { label: 'Failed', class: 'status-failed' },
+  'Cancelled': { label: 'Cancelled', class: 'status-cancelled' }
 }
 
 const hasCancellableJobs = computed(() => {
@@ -42,7 +42,7 @@ async function fetchHistory() {
     groupedHistory.value = await ApiService.getDownloadHistory()
   } catch (e) {
     console.error('Failed to fetch download history', e)
-    error.value = 'Fehler beim Laden des Verlaufs.'
+    error.value = 'Failed to load download history.'
   } finally {
     loading.value = false
   }
@@ -50,14 +50,14 @@ async function fetchHistory() {
 
 async function cancelDownload(id) {
   if (!Dashboard) return
-  Dashboard.confirm('Soll dieser Download wirklich abgebrochen werden?', 'Download abbrechen', async (result) => {
+  Dashboard.confirm('Are you sure you want to cancel this download?', 'Cancel Download', async (result) => {
     if (result) {
       try {
         await ApiService.cancelDownload(id)
         await fetchActiveDownloads()
       } catch (e) {
         console.error('Cancel failed', e)
-        Dashboard.alert('Fehler beim Abbrechen des Downloads.')
+        Dashboard.alert('Failed to cancel the download.')
       }
     }
   })
@@ -65,14 +65,14 @@ async function cancelDownload(id) {
 
 async function cancelAllDownloads() {
   if (!Dashboard) return
-  Dashboard.confirm('Sollen wirklich ALLE aktiven Downloads abgebrochen werden?', 'Alle abbrechen', async (result) => {
+  Dashboard.confirm('Are you sure you want to cancel ALL active downloads?', 'Cancel All', async (result) => {
     if (result) {
       try {
         await ApiService.cancelAllDownloads()
         await fetchActiveDownloads()
       } catch (e) {
         console.error('Cancel all failed', e)
-        Dashboard.alert('Fehler beim Abbrechen der Downloads.')
+        Dashboard.alert('Failed to cancel the downloads.')
       }
     }
   })
@@ -93,7 +93,7 @@ function formatDate(dateStr) {
 }
 
 function getStatusLabel(status) {
-  return statusMap[status]?.label || status || 'Unbekannt'
+  return statusMap[status]?.label || status || 'Unknown'
 }
 
 function getStatusClass(status) {
@@ -164,27 +164,27 @@ onUnmounted(() => {
     <!-- Active Downloads -->
     <section class="card active-downloads-section">
       <div class="header-row">
-        <h2>Aktive Downloads</h2>
+        <h2>Active Downloads</h2>
         <div class="header-actions">
           <button
             v-if="hasInactiveJobs"
             @click="clearInactiveDownloads"
             class="btn btn-secondary btn-sm"
           >
-            Liste bereinigen
+            Clear List
           </button>
           <button
             v-if="hasCancellableJobs"
             @click="cancelAllDownloads"
             class="btn btn-danger btn-sm"
           >
-            Alle abbrechen
+            Cancel All
           </button>
         </div>
       </div>
 
       <div v-if="activeDownloads.length === 0" class="no-data">
-        Keine aktiven Downloads.
+        No active downloads.
       </div>
       <div v-else class="list-container">
         <div v-for="dl in activeDownloads" :key="dl.Id" class="item-container">
@@ -217,7 +217,7 @@ onUnmounted(() => {
                 v-if="isCancellable(dl.Status)"
                 @click.stop="cancelDownload(dl.Id)"
                 class="btn-icon btn-cancel"
-                title="Abbrechen"
+                title="Cancel"
               >
                 ✕
               </button>
@@ -249,16 +249,16 @@ onUnmounted(() => {
 
     <!-- History -->
     <section class="card history-section">
-      <h2>Download Verlauf</h2>
+      <h2>Download History</h2>
       <div v-if="loading" class="state-msg">
         <div class="spinner"></div>
-        Lade Verlauf...
+        Loading history...
       </div>
       <div v-else-if="error" class="error-container">
         {{ error }}
       </div>
       <div v-else-if="groupedHistory.length === 0" class="no-data">
-        Kein Download-Verlauf vorhanden.
+        No download history available.
       </div>
       <div v-else class="list-container">
         <div v-for="group in groupedHistory" :key="getGroupKey(group)" class="item-container">
@@ -266,11 +266,11 @@ onUnmounted(() => {
             <div class="item-info">
               <div class="item-title">
                 <span class="expand-icon">{{ expandedGroups.has(getGroupKey(group)) ? '▼' : '▶' }}</span>
-                {{ group.DisplayName || 'Unbekannter Titel' }}
+                {{ group.DisplayName || 'Unknown Title' }}
               </div>
               <div class="item-meta">
                 <span class="timestamp-text">{{ formatDate(group.LatestTimestamp) }}</span>
-                <span v-if="group.Entries.length > 1" class="file-count">({{ group.Entries.length }} Dateien)</span>
+                <span v-if="group.Entries.length > 1" class="file-count">({{ group.Entries.length }} files)</span>
               </div>
             </div>
           </div>

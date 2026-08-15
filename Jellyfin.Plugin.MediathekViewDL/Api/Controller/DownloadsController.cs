@@ -227,14 +227,14 @@ public class DownloadsController : ControllerBase
         if (config == null)
         {
             _logger.LogError("Plugin configuration is not available. Cannot start manual download.");
-            return StatusCode(500, new ApiErrorDto(ApiErrorId.ConfigurationNotAvailable, "Plugin-Konfiguration ist nicht verfügbar."));
+            return StatusCode(500, new ApiErrorDto(ApiErrorId.ConfigurationNotAvailable, "Plugin configuration is not available."));
         }
 
         var videoUrl = item?.GetVideoByQuality()?.Url;
 
         if (item == null || string.IsNullOrWhiteSpace(videoUrl))
         {
-            return BadRequest(new ApiErrorDto(ApiErrorId.InvalidItem, "Ungültiges Element für den Download bereitgestellt (keine Video-URL)."));
+            return BadRequest(new ApiErrorDto(ApiErrorId.InvalidItem, "Invalid item provided for download (no video URL)."));
         }
 
         var videoInfo = _videoParser.ParseVideoInfo(item.Topic, item.Title);
@@ -250,13 +250,13 @@ public class DownloadsController : ControllerBase
         if (!paths.IsValid)
         {
             _logger.LogError("Could not generate download paths for item: {Title}", item.Title);
-            return BadRequest(new ApiErrorDto(ApiErrorId.InvalidPath, "Download-Pfade konnten nicht generiert werden."));
+            return BadRequest(new ApiErrorDto(ApiErrorId.InvalidPath, "Download paths could not be generated."));
         }
 
         if (FileDownloader.GetDiskSpace(paths.DirectoryPath) < config.Download.MinFreeDiskSpaceBytes)
         {
             _logger.LogError("Not enough free disk space to start download for item: {Title} at {Path}", item.Title, paths.DirectoryPath);
-            return BadRequest(new ApiErrorDto(ApiErrorId.InsufficientDiskSpace, "Nicht genügend freier Speicherplatz, um den Download zu starten."));
+            return BadRequest(new ApiErrorDto(ApiErrorId.InsufficientDiskSpace, "Not enough free disk space to start the download."));
         }
 
         _logger.LogInformation("Manual download requested for item: {Title}", item.Title);
@@ -280,7 +280,7 @@ public class DownloadsController : ControllerBase
         }
 
         _downloadQueueManager.QueueJob(job);
-        return Ok($"Download für '{item.Title}' in Warteschlange.");
+        return Ok($"Download for '{item.Title}' added to the queue.");
     }
 
     /// <summary>
@@ -300,7 +300,7 @@ public class DownloadsController : ControllerBase
         if (config == null)
         {
             _logger.LogError("Plugin configuration is not available. Cannot start advanced download.");
-            return StatusCode(500, new ApiErrorDto(ApiErrorId.ConfigurationNotAvailable, "Plugin-Konfiguration ist nicht verfügbar."));
+            return StatusCode(500, new ApiErrorDto(ApiErrorId.ConfigurationNotAvailable, "Plugin configuration is not available."));
         }
 
         if (options == null)
@@ -313,23 +313,23 @@ public class DownloadsController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(videoUrl))
         {
-            return BadRequest(new ApiErrorDto(ApiErrorId.InvalidItem, "Ungültiges Element für den Download bereitgestellt (keine Video-URL)."));
+            return BadRequest(new ApiErrorDto(ApiErrorId.InvalidItem, "Invalid item provided for download (no video URL)."));
         }
 
         if (string.IsNullOrWhiteSpace(options.DownloadPath) || string.IsNullOrWhiteSpace(options.FileName))
         {
-            return BadRequest(new ApiErrorDto(ApiErrorId.InvalidOptions, "Download-Pfad und Dateiname sind für den erweiterten Download erforderlich."));
+            return BadRequest(new ApiErrorDto(ApiErrorId.InvalidOptions, "Download path and filename are required for advanced downloads."));
         }
 
         if (!_fileNameBuilder.IsPathSafe(options.DownloadPath))
         {
             _logger.LogWarning("Blocked advanced download request to unsafe path: {Path}", options.DownloadPath);
-            return BadRequest(new ApiErrorDto(ApiErrorId.UnsafePath, "Der angegebene Download-Pfad ist nicht zulässig. Bitte verwenden Sie einen Pfad innerhalb Ihrer Bibliothek oder der konfigurierten Download-Verzeichnisse."));
+            return BadRequest(new ApiErrorDto(ApiErrorId.UnsafePath, "The specified download path is not allowed. Please use a path inside your library or one of the configured download directories."));
         }
 
         if (_fileNameBuilder.SanitizeFileName(options.FileName) != options.FileName)
         {
-            return BadRequest(new ApiErrorDto(ApiErrorId.InvalidFilename, "Der Dateiname enthält ungültige Zeichen."));
+            return BadRequest(new ApiErrorDto(ApiErrorId.InvalidFilename, "The filename contains invalid characters."));
         }
 
         var videoInfo = _videoParser.ParseVideoInfo(item.Topic, item.Title);
@@ -344,7 +344,7 @@ public class DownloadsController : ControllerBase
 #pragma warning restore CA3003
         {
             _logger.LogError("Not enough free disk space to start advanced download for item: {Title} at {Path}", item.Title, options.DownloadPath);
-            return BadRequest(new ApiErrorDto(ApiErrorId.InsufficientDiskSpace, "Nicht genügend freier Speicherplatz, um den Download zu starten."));
+            return BadRequest(new ApiErrorDto(ApiErrorId.InsufficientDiskSpace, "Not enough free disk space to start the download."));
         }
 
         _logger.LogInformation("Advanced download requested for item: {Title} to path: {Path} with filename: {FileName}", item.Title, options.DownloadPath, options.FileName);

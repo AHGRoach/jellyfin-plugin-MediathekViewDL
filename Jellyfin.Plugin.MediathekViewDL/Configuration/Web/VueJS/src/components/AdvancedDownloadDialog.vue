@@ -72,7 +72,7 @@ function selectDownloadPath() {
     if (!Dashboard) return
     const picker = new Dashboard.DirectoryBrowser()
     picker.show({
-        header: 'Download-Pfad wählen',
+        header: 'Select Download Path',
         includeDirectories: true,
         includeFiles: false,
         callback: (path) => {
@@ -86,7 +86,7 @@ function selectDownloadPath() {
 
 async function startDownload() {
     if (!props.item || !downloadPath.value || !downloadFileName.value) {
-        if (Dashboard) Dashboard.alert('Bitte füllen Sie alle erforderlichen Felder aus.')
+        if (Dashboard) Dashboard.alert('Please fill in all required fields.')
         return
     }
 
@@ -100,12 +100,12 @@ async function startDownload() {
             SubtitleName: subtitleFileName.value
         }
         await ApiService.advancedDownload(options)
-        if (Dashboard) Dashboard.alert('Erweiterte Download erfolgreich in Warteschlange eingereiht.')
+        if (Dashboard) Dashboard.alert('Advanced download successfully added to the queue.')
         emit('download')
         emit('close')
     } catch (e) {
         console.error('Advanced download failed', e)
-        if (Dashboard) Dashboard.alert('Fehler beim Starten des erweiterten Downloads: ' + (e?.message || 'Unbekannter Fehler'))
+        if (Dashboard) Dashboard.alert('Failed to start advanced download: ' + (e?.message || 'Unknown error'))
     } finally {
         isDownloading.value = false
     }
@@ -120,7 +120,7 @@ function closeDialog() {
     <div class="modal-overlay" @click.self="closeDialog">
         <div class="modal-dialog">
             <div class="modal-header">
-                <h3>Erweiterte Download-Optionen</h3>
+                <h3>Advanced Download Options</h3>
                 <button @click="closeDialog" class="modal-close" :disabled="isDownloading">✕</button>
             </div>
             <div class="modal-content">
@@ -131,42 +131,42 @@ function closeDialog() {
 
                 <div v-if="isLoading" class="loading-state">
                     <div class="spinner"></div>
-                    Lade empfohlene Einstellungen...
+                    Loading recommended settings...
                 </div>
 
                 <template v-else>
                     <div class="modal-field">
-                        <label>Download-Pfad *</label>
+                        <label>Download Path *</label>
                         <div class="path-input-group">
-                            <input v-model="downloadPath" type="text" class="field-input" placeholder="Wählen Sie einen Pfad" readonly>
+                            <input v-model="downloadPath" type="text" class="field-input" placeholder="Select a path" readonly>
                             <button @click="selectDownloadPath" class="btn btn-secondary btn-sm" type="button" :disabled="isDownloading">
-                                Durchsuchen
+                                Browse
                             </button>
                         </div>
                     </div>
 
                     <div class="modal-field">
-                        <label>Dateiname *</label>
-                        <input v-model="downloadFileName" type="text" class="field-input" placeholder="Dateiname ohne Erweiterung" :disabled="isDownloading">
+                        <label>Filename *</label>
+                        <input v-model="downloadFileName" type="text" class="field-input" placeholder="Filename without extension" :disabled="isDownloading">
                     </div>
 
                     <div class="modal-field checkbox-field">
                         <input v-model="downloadSubtitles" type="checkbox" class="field-checkbox" id="dl-subtitles" :disabled="isDownloading">
-                        <label for="dl-subtitles">Untertitel herunterladen</label>
+                        <label for="dl-subtitles">Download subtitles</label>
                     </div>
 
                     <div v-if="downloadSubtitles" class="modal-field">
-                        <label>Untertitel-Dateiname</label>
-                        <input v-model="subtitleFileName" type="text" class="field-input" placeholder="Leer lassen für automatischen Namen" :disabled="isDownloading">
+                        <label>Subtitle Filename</label>
+                        <input v-model="subtitleFileName" type="text" class="field-input" placeholder="Leave blank for automatic name" :disabled="isDownloading">
                     </div>
                 </template>
             </div>
             <div class="modal-footer">
                 <button @click="closeDialog" class="btn btn-secondary" :disabled="isDownloading">
-                    Abbrechen
+                    Cancel
                 </button>
                 <button @click="startDownload" class="btn btn-primary" :disabled="isDownloading || !downloadPath || !downloadFileName || isLoading">
-                    {{ isDownloading ? 'Wird heruntergeladen...' : 'Download starten' }}
+                    {{ isDownloading ? 'Downloading...' : 'Start Download' }}
                 </button>
             </div>
         </div>

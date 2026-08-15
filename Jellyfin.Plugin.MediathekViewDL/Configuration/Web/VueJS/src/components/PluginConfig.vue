@@ -41,14 +41,14 @@ async function saveSubscription(sub) {
   try {
      await ApiService.saveSubscription(sub)
      editingSub.value = null
-     if (Dashboard) Dashboard.alert('Abonnement gespeichert.')
+     if (Dashboard) Dashboard.alert('Subscription saved.')
      // Refresh subscriptions tab
      if (subscriptionsTabRef.value) {
        subscriptionsTabRef.value.refresh()
      }
   } catch (e) {
     console.error('Save failed', e)
-    if (Dashboard) Dashboard.alert('Fehler beim Speichern des Abonnements.')
+    if (Dashboard) Dashboard.alert('Failed to save the subscription.')
   }
 }
 
@@ -67,7 +67,7 @@ async function testSubscription(sub) {
     testResults.value = finalArray;
   } catch (e) {
     console.error('Test failed', e)
-    if (Dashboard) Dashboard.alert('Fehler beim Testen des Abonnements.')
+    if (Dashboard) Dashboard.alert('Failed to test the subscription.')
     showTestModal.value = false
   } finally {
     testLoading.value = false
@@ -86,9 +86,9 @@ onMounted(() => {
     </header>
 
     <div class="tab-row">
-      <button class="tab-btn" :class="{ active: currentTab === 'search' }" @click="currentTab = 'search'">Suche</button>
-      <button class="tab-btn" :class="{ active: currentTab === 'settings' }" @click="currentTab = 'settings'">Einstellungen</button>
-      <button class="tab-btn" :class="{ active: currentTab === 'subscriptions' }" @click="currentTab = 'subscriptions'">Abos</button>
+      <button class="tab-btn" :class="{ active: currentTab === 'search' }" @click="currentTab = 'search'">Search</button>
+      <button class="tab-btn" :class="{ active: currentTab === 'settings' }" @click="currentTab = 'settings'">Settings</button>
+      <button class="tab-btn" :class="{ active: currentTab === 'subscriptions' }" @click="currentTab = 'subscriptions'">Subscriptions</button>
       <button class="tab-btn" :class="{ active: currentTab === 'downloads' }" @click="currentTab = 'downloads'">Downloads</button>
       <button class="tab-btn" :class="{ active: currentTab === 'logs' }" @click="currentTab = 'logs'">Logs</button>
     </div>
@@ -116,19 +116,19 @@ onMounted(() => {
       <div v-if="showTestModal" class="modal-overlay">
         <div class="modal-card test-modal card">
           <header class="modal-header">
-            <h2>Abo-Test Ergebnisse</h2>
+            <h2>Subscription Test Results</h2>
             <button @click="showTestModal = false" class="btn-icon">✕</button>
           </header>
           <div class="modal-content">
             <div v-if="testLoading" class="state-msg">
               <div class="spinner"></div>
-              Suche nach Treffern...
+              Searching for matches...
             </div>
             <div v-else-if="testResults.length === 0" class="no-data">
-              Keine Sendungen gefunden.
+              No programs found.
             </div>
             <div v-else class="test-results-list">
-              <p>Folgende {{ testResults.length }} Sendungen würden heruntergeladen werden:</p>
+              <p>The following {{ testResults.length }} programs would be downloaded:</p>
               <div v-for="(item, idx) in testResults" :key="idx" class="test-item">
                 <div class="test-item-title">{{ item.Title }}</div>
                   <div class="test-item-meta">{{ item.Channel }} | {{ item.Topic }} | {{ item.Duration }}</div>
@@ -137,7 +137,7 @@ onMounted(() => {
             </div>
           </div>
           <footer class="modal-footer">
-            <button @click="showTestModal = false" class="btn btn-primary">Schließen</button>
+            <button @click="showTestModal = false" class="btn btn-primary">Close</button>
           </footer>
         </div>
       </div>

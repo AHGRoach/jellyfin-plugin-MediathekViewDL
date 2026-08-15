@@ -291,7 +291,7 @@ public class SubscriptionProcessor : ISubscriptionProcessor
             string path = paths.MainFilePath;
             if (!paths.IsValid)
             {
-                path = "Warnung: Ungültiger Pfad";
+                path = "Warning: Invalid path";
             }
 
             var description = item.Description ?? string.Empty;
@@ -300,7 +300,7 @@ public class SubscriptionProcessor : ISubscriptionProcessor
                 description = string.Concat(description.AsSpan(0, 100), "...");
             }
 
-            yield return item with { Description = $"Pfad: {path} | {description}" };
+            yield return item with { Description = $"Path: {path} | {description}" };
         }
     }
 

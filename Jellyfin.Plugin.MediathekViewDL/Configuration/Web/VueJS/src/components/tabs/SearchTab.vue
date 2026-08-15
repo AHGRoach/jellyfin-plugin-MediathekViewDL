@@ -38,18 +38,18 @@ const filteredTopics = computed(() => {
     const lastPart = rawParts[rawParts.length - 1]
     const query = lastPart.trim().toLowerCase()
     const existing = new Set(rawParts.map(p => p.trim().toLowerCase()).filter(p => p))
-    
+
     let baseList = availableTopics.value.filter(t => !existing.has(t.toLowerCase()))
 
     // If it ends with comma or is empty but focused, or we have a query
     const shouldShowAll = searchTopic.value.endsWith(',') || searchTopic.value.endsWith(', ')
-    
+
     if (shouldShowAll) {
         return baseList.slice(0, 15)
     }
-    
+
     if (!query) return []
-    
+
     return baseList
         .filter(t => t.toLowerCase().includes(query))
         .slice(0, 15)
@@ -60,7 +60,7 @@ const filteredChannels = computed(() => {
     const lastPart = rawParts[rawParts.length - 1]
     const query = lastPart.trim().toLowerCase()
     const existing = new Set(rawParts.map(p => p.trim().toLowerCase()).filter(p => p))
-    
+
     let baseList = availableChannels.value.filter(c => !existing.has(c.toLowerCase()))
 
     const shouldShowAll = searchChannel.value.endsWith(',') || searchChannel.value.endsWith(', ')
@@ -70,7 +70,7 @@ const filteredChannels = computed(() => {
     }
 
     if (!query) return []
-    
+
     return baseList
         .filter(c => c.toLowerCase().includes(query))
         .slice(0, 15)
@@ -80,7 +80,7 @@ async function scrollToSelected(field) {
     await nextTick()
     const container = field === 'topic' ? topicSuggestionsRef.value : channelSuggestionsRef.value
     if (!container) return
-    
+
     const selectedItem = container.querySelector('.selected')
     if (selectedItem) {
         selectedItem.scrollIntoView({ block: 'nearest' })
@@ -89,7 +89,7 @@ async function scrollToSelected(field) {
 
 function onKeyDown(e, field) {
     const suggestions = field === 'topic' ? filteredTopics.value : filteredChannels.value
-    
+
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         if (field === 'topic') showTopicSuggestions.value = true
         else showChannelSuggestions.value = true
@@ -111,7 +111,7 @@ function onKeyDown(e, field) {
             e.preventDefault()
             selectSuggestion(field, suggestions[selectedSuggestionIndex.value])
         } else if (suggestions.length > 0 && (e.key === 'Tab' || e.key === 'Enter')) {
-             // Optional: auto-select first one on tab if nothing selected? 
+             // Optional: auto-select first one on tab if nothing selected?
              // Better keep it explicit for now.
         }
     } else if (e.key === 'Escape') {
@@ -176,7 +176,7 @@ async function performSearch() {
         results.value = await ApiService.search(filters)
     } catch (e) {
         console.error('Search failed', e)
-        if (Dashboard) Dashboard.alert('Fehler bei der Suche: ' + (e?.message || 'Unbekannter Fehler'))
+        if (Dashboard) Dashboard.alert('Search failed: ' + (e?.message || 'Unknown error'))
     } finally {
         loading.value = false
     }
@@ -233,7 +233,7 @@ async function createSubFromSearch() {
 
          const defaults = props.pluginConfig?.SubscriptionDefaults || {}
          const sub = SubscriptionFactory.createDefault(defaults)
-         sub.Name = searchTitle.value || searchTopic.value || searchCombined.value || 'Suche'
+         sub.Name = searchTitle.value || searchTopic.value || searchCombined.value || 'Search'
          sub.Search.Criteria = criteria
          sub.Search.MinDurationMinutes = minDuration.value
          sub.Search.MaxDurationMinutes = maxDuration.value
@@ -243,7 +243,7 @@ async function createSubFromSearch() {
          props.onCreateSub(sub);
      } catch (e) {
          console.error('Failed to convert criteria', e)
-         if (Dashboard) Dashboard.alert('Fehler beim Erstellen des Abos: ' + (e?.message || 'Unbekannter Fehler'))
+         if (Dashboard) Dashboard.alert('Failed to create subscription: ' + (e?.message || 'Unknown error'))
      }
 }
 
@@ -265,7 +265,7 @@ async function createSubFromItem(item) {
           props.onCreateSub(sub);
       } catch (e) {
           console.error('Failed to convert item criteria', e)
-          if (Dashboard) Dashboard.alert('Fehler beim Erstellen des Abos: ' + (e?.message || 'Unbekannter Fehler'))
+          if (Dashboard) Dashboard.alert('Failed to create subscription: ' + (e?.message || 'Unknown error'))
       }
   }
 
@@ -273,10 +273,10 @@ async function simpleDownload(item) {
       try {
           isDownloading.value = true
           await ApiService.downloadItem(item)
-          if (Dashboard) Dashboard.alert('Download erfolgreich in Warteschlange eingereiht.')
+          if (Dashboard) Dashboard.alert('Download successfully added to the queue.')
       } catch (e) {
           console.error('Simple download failed', e)
-          if (Dashboard) Dashboard.alert('Fehler beim Starten des Downloads: ' + (e?.message || 'Unbekannter Fehler'))
+          if (Dashboard) Dashboard.alert('Failed to start download: ' + (e?.message || 'Unknown error'))
       } finally {
           isDownloading.value = false
       }
@@ -295,21 +295,21 @@ function closeAdvancedDownloadDialog() {
 
 <template>
     <div class="card">
-        <h2>Suche</h2>
+        <h2>Search</h2>
         <form @submit.prevent="performSearch" class="search-form">
             <div class="search-grid">
                 <div class="field">
-                    <label>Titel</label>
-                    <input v-model="searchTitle" type="text" class="field-input" placeholder="Titel der Sendung">
+                    <label>Title</label>
+                    <input v-model="searchTitle" type="text" class="field-input" placeholder="Program title">
                 </div>
                 <div class="field autocomplete-wrapper">
-                    <label>Thema</label>
-                    <input v-model="searchTopic" type="text" class="field-input" placeholder="Thema / Sendereihe" 
-                        @focus="showTopicSuggestions = true; selectedSuggestionIndex = -1" 
+                    <label>Topic</label>
+                    <input v-model="searchTopic" type="text" class="field-input" placeholder="Topic / Series"
+                        @focus="showTopicSuggestions = true; selectedSuggestionIndex = -1"
                         @blur="onBlur('topic')"
                         @keydown="onKeyDown($event, 'topic')">
                     <ul v-if="showTopicSuggestions && filteredTopics.length > 0" ref="topicSuggestionsRef" class="suggestions-list" tabindex="-1">
-                        <li v-for="(topic, index) in filteredTopics" :key="topic" 
+                        <li v-for="(topic, index) in filteredTopics" :key="topic"
                             :class="{ selected: index === selectedSuggestionIndex }"
                             @mousedown.prevent="selectSuggestion('topic', topic)"
                             tabindex="-1">
@@ -318,13 +318,13 @@ function closeAdvancedDownloadDialog() {
                     </ul>
                 </div>
                 <div class="field autocomplete-wrapper">
-                    <label>Sender</label>
-                    <input v-model="searchChannel" type="text" class="field-input" placeholder="z.B. ARD, ZDF" 
-                        @focus="showChannelSuggestions = true; selectedSuggestionIndex = -1" 
+                    <label>Channel</label>
+                    <input v-model="searchChannel" type="text" class="field-input" placeholder="e.g. ARD, ZDF"
+                        @focus="showChannelSuggestions = true; selectedSuggestionIndex = -1"
                         @blur="onBlur('channel')"
                         @keydown="onKeyDown($event, 'channel')">
                     <ul v-if="showChannelSuggestions && filteredChannels.length > 0" ref="channelSuggestionsRef" class="suggestions-list" tabindex="-1">
-                        <li v-for="(channel, index) in filteredChannels" :key="channel" 
+                        <li v-for="(channel, index) in filteredChannels" :key="channel"
                             :class="{ selected: index === selectedSuggestionIndex }"
                             @mousedown.prevent="selectSuggestion('channel', channel)"
                             tabindex="-1">
@@ -333,59 +333,59 @@ function closeAdvancedDownloadDialog() {
                     </ul>
                 </div>
                 <div class="field">
-                    <label>Kombinierte Suche</label>
-                    <input v-model="searchCombined" type="text" class="field-input" placeholder="Sucht in Titel und Thema">
+                    <label>Combined Search</label>
+                    <input v-model="searchCombined" type="text" class="field-input" placeholder="Searches title and topic">
                 </div>
 
                 <div class="field">
-                    <label>Min. Dauer (Minuten)</label>
+                    <label>Min. Duration (minutes)</label>
                     <input v-model="minDuration" type="number" class="field-input" placeholder="0">
                 </div>
                 <div class="field">
-                    <label>Max. Dauer (Minuten)</label>                    <input v-model="maxDuration" type="number" class="field-input" placeholder="unbegrenzt">
+                    <label>Max. Duration (minutes)</label>                    <input v-model="maxDuration" type="number" class="field-input" placeholder="Unlimited">
                 </div>
 
                 <div class="field">
-                    <label>Von Datum</label>
+                    <label>From Date</label>
                     <input v-model="minBroadcastDate" type="date" class="field-input">
                 </div>
                 <div class="field">
-                    <label>Bis Datum</label>
+                    <label>To Date</label>
                     <input v-model="maxBroadcastDate" type="date" class="field-input">
                 </div>
             </div>
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary" :disabled="loading">
-                    {{ loading ? 'Suche läuft...' : 'Suche starten' }}
+                    {{ loading ? 'Searching...' : 'Search' }}
                 </button>
-                <button type="button" @click="createSubFromSearch" class="btn btn-secondary btn-icon-only" title="Abo aus Suche erstellen">
+                <button type="button" @click="createSubFromSearch" class="btn btn-secondary btn-icon-only" title="Create subscription from search">
                     ➕
                 </button>
             </div>
         </form>
 
         <div v-if="results.length > 0" class="results-list">
-            <h3>Ergebnisse ({{ results.length < 50 ? results.length : '50+'}})</h3>
+            <h3>Results ({{ results.length < 50 ? results.length : '50+'}})</h3>
             <div v-for="item in results" :key="item.Id" class="result-item">
                 <div class="result-info">
                     <div class="result-title">{{ item.Title }}</div>
                     <div class="result-meta">
                         {{ item.Channel }} | {{ item.Topic }} | {{ item.Duration }} |
-                        <span v-if="item.SubtitleUrls && item.SubtitleUrls.length > 0" class="material-icons closed_caption" title="Untertitel verfügbar"></span>
+                        <span v-if="item.SubtitleUrls && item.SubtitleUrls.length > 0" class="material-icons closed_caption" title="Subtitles available"></span>
                     </div>
                     <div class="result-meta">{{ item.Description }}</div>
                 </div>
                 <div class="result-actions">
-                    <button @click="openVideo(item)" class="btn-icon" title="Im Browser abspielen">▶</button>
-                    <button @click="simpleDownload(item)" class="btn-icon" title="Schneller Download" :disabled="isDownloading">⬇</button>
-                    <button @click="openAdvancedDownloadDialog(item)" class="btn-icon" title="Erweiterte Download-Optionen">⬇⚙</button>
-                    <button @click="createSubFromItem(item)" class="btn-icon" title="Abo für diese Sendung erstellen">➕</button>
+                    <button @click="openVideo(item)" class="btn-icon" title="Play in browser">▶</button>
+                    <button @click="simpleDownload(item)" class="btn-icon" title="Quick download" :disabled="isDownloading">⬇</button>
+                    <button @click="openAdvancedDownloadDialog(item)" class="btn-icon" title="Advanced download options">⬇⚙</button>
+                    <button @click="createSubFromItem(item)" class="btn-icon" title="Create subscription for this program">➕</button>
                 </div>
             </div>
         </div>
         <div v-else-if="!loading && (searchTitle || searchTopic || searchChannel || searchCombined)" class="no-results">
-            Keine Ergebnisse gefunden.
+            No results found.
         </div>
     </div>
 

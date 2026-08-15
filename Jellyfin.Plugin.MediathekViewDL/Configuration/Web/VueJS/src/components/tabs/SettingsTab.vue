@@ -87,7 +87,7 @@ async function loadConfig() {
   try {
     const config = await ApiService.getPluginConfig(PLUGIN_ID)
 
-    lastRun.value = config.LastRun ? new Date(config.LastRun).toLocaleString() : 'Noch nie'
+    lastRun.value = config.LastRun ? new Date(config.LastRun).toLocaleString() : 'Never'
 
     // Paths
     useTopicForMoviePath.value = config.Paths?.UseTopicForMoviePath ?? false
@@ -239,12 +239,12 @@ async function saveConfig() {
     }
 
      await ApiService.updatePluginConfig(PLUGIN_ID, config)
-     if (Dashboard) Dashboard.alert('Einstellungen gespeichert.')
+     if (Dashboard) Dashboard.alert('Settings saved.')
      // Notify parent to refresh config
      emit('config-saved')
   } catch (e) {
     console.error('Failed to save config', e)
-    if (Dashboard) Dashboard.alert('Fehler beim Speichern der Einstellungen.')
+    if (Dashboard) Dashboard.alert('Failed to save settings.')
   } finally {
     saving.value = false
   }
@@ -256,9 +256,9 @@ async function copyConfig() {
     const text = JSON.stringify(config, null, 2)
     if (window.isSecureContext) {
       await navigator.clipboard.writeText(text)
-      if (Dashboard) Dashboard.alert('Konfiguration in die Zwischenablage kopiert.')
+      if (Dashboard) Dashboard.alert('Configuration copied to the clipboard.')
     } else {
-      prompt('Bitte manuell kopieren:', text)
+      prompt('Copy manually:', text)
     }
   } catch (e) {
     console.error('Failed to copy config', e)
@@ -279,7 +279,7 @@ function selectPath(targetRef, header) {
       }
     })
   } catch (e) {
-    const newPath = prompt(header + '\nAktueller Pfad: ' + targetRef.value, targetRef.value)
+    const newPath = prompt(header + '\nCurrent path: ' + targetRef.value, targetRef.value)
     if (newPath !== null && newPath.trim() !== '') targetRef.value = newPath.trim()
   }
 }
@@ -288,11 +288,11 @@ async function setupTuner() {
   try {
     if (Dashboard) Dashboard.showLoadingMsg()
     await ApiService.addTunerHost({ Type: 'zapp', Url: 'zapp', FriendlyName: 'Zapp (MediathekView)', TunerCount: 0 })
-    if (Dashboard) { Dashboard.hideLoadingMsg(); Dashboard.alert('Zapp Tuner erfolgreich hinzugefügt.') }
+    if (Dashboard) { Dashboard.hideLoadingMsg(); Dashboard.alert('Zapp tuner added successfully.') }
   } catch (e) {
     if (Dashboard) Dashboard.hideLoadingMsg()
     console.error('Error adding tuner', e)
-    if (Dashboard) Dashboard.alert('Fehler beim Hinzufügen des Tuners.')
+    if (Dashboard) Dashboard.alert('Failed to add the tuner.')
   }
 }
 
@@ -300,11 +300,11 @@ async function setupGuide() {
   try {
     if (Dashboard) Dashboard.showLoadingMsg()
     await ApiService.addListingProvider({ Type: 'zapp', Id: 'zapp_guide', Name: 'Zapp (MediathekView)' })
-    if (Dashboard) { Dashboard.hideLoadingMsg(); Dashboard.alert('Zapp Guide Provider erfolgreich hinzugefügt.') }
+    if (Dashboard) { Dashboard.hideLoadingMsg(); Dashboard.alert('Zapp guide provider added successfully.') }
   } catch (e) {
     if (Dashboard) Dashboard.hideLoadingMsg()
     console.error('Error adding guide', e)
-    if (Dashboard) Dashboard.alert('Fehler beim Hinzufügen des Guide Providers.')
+    if (Dashboard) Dashboard.alert('Failed to add the guide provider.')
   }
 }
 
@@ -315,110 +315,110 @@ onMounted(() => {
 
 <template>
   <div class="card settings-card">
-    <div v-if="loading" class="state-msg"><div class="spinner"></div> Einstellungen werden geladen...</div>
+    <div v-if="loading" class="state-msg"><div class="spinner"></div> Loading settings...</div>
 
     <form v-else @submit.prevent="saveConfig">
 
       <!-- ===== ALLGEMEIN (hidden, no active options) ===== -->
       <details hidden class="settings-section">
-        <summary class="section-title">Allgemeine Einstellungen</summary>
+        <summary class="section-title">General Settings</summary>
         <div class="section-body"></div>
       </details>
 
       <!-- ===== PFADE ===== -->
       <details class="settings-section">
-        <summary class="section-title">Pfade-Einstellungen</summary>
+        <summary class="section-title">Path Settings</summary>
         <div class="section-body">
           <div class="checkbox-field">
             <label>
-              <input v-model="useTopicForMoviePath" type="checkbox"> Beim Film Downloads Ordner für das Thema erstellen
+              <input v-model="useTopicForMoviePath" type="checkbox"> Create a topic folder for movie downloads
             </label>
             <p class="field-desc">
-              Beim Film Downloads einen Ordner für das Thema (bzw. den Abo-Namen bei Abonnements) erstellen.<br>
-              z.B. Wenn an: /Filme/Filme im Ersten/Filmname/Filmname.mkv<br>
-              Wenn aus: /Filme/Filmname/Filmname.mkv
+              For movie downloads, create a folder for the topic (or subscription name for subscriptions).<br>
+              e.g. when enabled: /Filme/Filme im Ersten/Filmname/Filmname.mkv<br>
+              when disabled: /Filme/Filmname/Filmname.mkv
             </p>
           </div>
 
           <div class="field">
-            <label class="field-label">Globaler Standard Download Pfad <span class="badge-deprecated">Veraltet</span></label>
+            <label class="field-label">Global Default Download Path <span class="badge-deprecated">Deprecated</span></label>
             <div class="path-row">
-              <input v-model="defaultDownloadPath" type="text" class="field-input" placeholder="Leer lassen für Standard">
-              <button type="button" class="btn btn-secondary btn-sm" @click="selectPath(defaultDownloadPath, 'Globalen Standard Download Pfad wählen')" title="Ordner auswählen">📁</button>
+              <input v-model="defaultDownloadPath" type="text" class="field-input" placeholder="Leave blank to use default">
+              <button type="button" class="btn btn-secondary btn-sm" @click="selectPath(defaultDownloadPath, 'Select Global Default Download Path')" title="Select folder">📁</button>
             </div>
-            <p class="field-desc">Der globale Fallback-Ordner für alle Downloads. <span style="color:#f87171;font-weight:bold;">Hinweis: Dieser Pfad ist veraltet und wird in einer zukünftigen Version entfernt.</span></p>
+            <p class="field-desc">The global fallback folder for all downloads. <span style="color:#f87171;font-weight:bold;">Note: This path is deprecated and will be removed in a future version.</span></p>
           </div>
 
           <div class="field">
-            <label class="field-label">Standard Serien Pfad (Abo)</label>
+            <label class="field-label">Default Series Path (Subscriptions)</label>
             <div class="path-row">
-              <input v-model="subscriptionShowPath" type="text" class="field-input" placeholder="Leer lassen für Standard">
-              <button type="button" class="btn btn-secondary btn-sm" @click="selectPath(subscriptionShowPath, 'Standard Serien Pfad (Abo) wählen')" title="Ordner auswählen">📁</button>
+              <input v-model="subscriptionShowPath" type="text" class="field-input" placeholder="Leave blank to use default">
+              <button type="button" class="btn btn-secondary btn-sm" @click="selectPath(subscriptionShowPath, 'Select Default Series Path (Subscriptions)')" title="Select folder">📁</button>
             </div>
-            <p class="field-desc">Standard-Ordner für Serien-Downloads in Abonnements.</p>
+            <p class="field-desc">Default folder for series downloads from subscriptions.</p>
           </div>
 
           <div class="field">
-            <label class="field-label">Standard Film Pfad (Abo)</label>
+            <label class="field-label">Default Movie Path (Subscriptions)</label>
             <div class="path-row">
-              <input v-model="subscriptionMoviePath" type="text" class="field-input" placeholder="Leer lassen für Standard">
-              <button type="button" class="btn btn-secondary btn-sm" @click="selectPath(subscriptionMoviePath, 'Standard Film Pfad (Abo) wählen')" title="Ordner auswählen">📁</button>
+              <input v-model="subscriptionMoviePath" type="text" class="field-input" placeholder="Leave blank to use default">
+              <button type="button" class="btn btn-secondary btn-sm" @click="selectPath(subscriptionMoviePath, 'Select Default Movie Path (Subscriptions)')" title="Select folder">📁</button>
             </div>
-            <p class="field-desc">Standard-Ordner für Film-Downloads in Abonnements.</p>
+            <p class="field-desc">Default folder for movie downloads from subscriptions.</p>
           </div>
 
           <div class="field">
-            <label class="field-label">Standard Serien Pfad (Manuell)</label>
+            <label class="field-label">Default Series Path (Manual)</label>
             <div class="path-row">
-              <input v-model="manualShowPath" type="text" class="field-input" placeholder="Leer lassen für Standard">
-              <button type="button" class="btn btn-secondary btn-sm" @click="selectPath(manualShowPath, 'Standard Serien Pfad (Manuell) wählen')" title="Ordner auswählen">📁</button>
+              <input v-model="manualShowPath" type="text" class="field-input" placeholder="Leave blank to use default">
+              <button type="button" class="btn btn-secondary btn-sm" @click="selectPath(manualShowPath, 'Select Default Series Path (Manual)')" title="Select folder">📁</button>
             </div>
-            <p class="field-desc">Standard-Ordner für manuelle Serien-Downloads.</p>
+            <p class="field-desc">Default folder for manual series downloads.</p>
           </div>
 
           <div class="field">
-            <label class="field-label">Standard Film Pfad (Manuell)</label>
+            <label class="field-label">Default Movie Path (Manual)</label>
             <div class="path-row">
-              <input v-model="manualMoviePath" type="text" class="field-input" placeholder="Leer lassen für Standard">
-              <button type="button" class="btn btn-secondary btn-sm" @click="selectPath(manualMoviePath, 'Standard Film Pfad (Manuell) wählen')" title="Ordner auswählen">📁</button>
+              <input v-model="manualMoviePath" type="text" class="field-input" placeholder="Leave blank to use default">
+              <button type="button" class="btn btn-secondary btn-sm" @click="selectPath(manualMoviePath, 'Select Default Movie Path (Manual)')" title="Select folder">📁</button>
             </div>
-            <p class="field-desc">Standard-Ordner für manuelle Film-Downloads.</p>
+            <p class="field-desc">Default folder for manual movie downloads.</p>
           </div>
 
           <div class="field">
-            <label class="field-label">Temporärer Download Pfad</label>
+            <label class="field-label">Temporary Download Path</label>
             <div class="path-row">
-              <input v-model="tempDownloadPath" type="text" class="field-input" placeholder="Leer lassen für direkten Download">
-              <button type="button" class="btn btn-secondary btn-sm" @click="selectPath(tempDownloadPath, 'Temporären Download Pfad wählen')" title="Ordner auswählen">📁</button>
+              <input v-model="tempDownloadPath" type="text" class="field-input" placeholder="Leave blank for direct download">
+              <button type="button" class="btn btn-secondary btn-sm" @click="selectPath(tempDownloadPath, 'Select Temporary Download Path')" title="Select folder">📁</button>
             </div>
-            <p class="field-desc">Ein optionaler Ordner, in dem Downloads zwischengespeichert werden. Leer lassen, um direkt in den Zielordner herunterzuladen.</p>
+            <p class="field-desc">An optional folder used to temporarily store downloads. Leave blank to download directly to the destination folder.</p>
           </div>
         </div>
       </details>
 
       <!-- ===== DOWNLOAD ===== -->
       <details class="settings-section">
-        <summary class="section-title">Download-Einstellungen</summary>
+        <summary class="section-title">Download Settings</summary>
         <div class="section-body">
           <div class="checkbox-field">
-            <label><input v-model="downloadSubtitles" type="checkbox"> Untertitel herunterladen (wenn verfügbar)</label>
-            <p class="field-desc">Lädt eine separate VTT- oder TTML-Datei für Untertitel herunter, falls vom Sender bereitgestellt.</p>
+            <label><input v-model="downloadSubtitles" type="checkbox"> Download subtitles (when available)</label>
+            <p class="field-desc">Downloads a separate VTT or TTML subtitle file when provided by the broadcaster.</p>
           </div>
 
           <div class="checkbox-field">
-            <label><input v-model="scanLibraryAfterDownload" type="checkbox"> Bibliotheks-Scan nach Download</label>
-            <p class="field-desc">Startet automatisch einen Scan der Medienbibliothek, nachdem neue Inhalte heruntergeladen wurden.</p>
+            <label><input v-model="scanLibraryAfterDownload" type="checkbox"> Scan Library After Download</label>
+            <p class="field-desc">Automatically scans the media library after new content is downloaded.</p>
           </div>
           <div class="grid-2">
             <div class="field">
-              <label class="field-label">Mindestfreier Speicherplatz (MiB)</label>
-              <input v-model="minFreeDiskSpaceMiB" type="number" class="field-input" placeholder="z.B. 1536">
-              <p class="field-desc">Minimaler freier Speicherplatz um einen neuen Download zu starten.</p>
+              <label class="field-label">Minimum Free Disk Space (MiB)</label>
+              <input v-model="minFreeDiskSpaceMiB" type="number" class="field-input" placeholder="e.g. 1536">
+              <p class="field-desc">Minimum free disk space required to start a new download.</p>
             </div>
             <div class="field">
-              <label class="field-label">Download-Geschwindigkeit</label>
-              <input v-model="readRate" type="number" class="field-input" min="0" step="0.1" placeholder="0 = unbegrenzt">
-              <p class="field-desc">FFmpeg readrate: 1 = Echtzeit, 2 = doppelte Geschwindigkeit, 0 = unbegrenzt.</p>
+              <label class="field-label">Download Speed</label>
+              <input v-model="readRate" type="number" class="field-input" min="0" step="0.1" placeholder="0 = unlimited">
+              <p class="field-desc">FFmpeg readrate: 1 = real time, 2 = double speed, 0 = unlimited.</p>
             </div>
           </div>
         </div>
@@ -426,161 +426,161 @@ onMounted(() => {
 
       <!-- ===== SUCHE ===== -->
       <details class="settings-section">
-        <summary class="section-title">Suche-Einstellungen</summary>
+        <summary class="section-title">Search Settings</summary>
         <div class="section-body">
           <div class="checkbox-field">
-            <label><input v-model="fetchStreamSizes" type="checkbox"> Größe des Streams abrufen</label>
-            <p class="field-desc">Wenn aktiviert, wird die Größe der Video-Dateien bei der Suche abgerufen. Dies verlangsamt die Suche erheblich.</p>
+            <label><input v-model="fetchStreamSizes" type="checkbox"> Fetch Stream Size</label>
+            <p class="field-desc">When enabled, video file sizes are retrieved during searches. This significantly slows down searching.</p>
           </div>
           <div class="checkbox-field">
-            <label><input v-model="searchInFutureBroadcasts" type="checkbox"> Suche in zukünftigen Ausstrahlungen</label>
-            <p class="field-desc">Manchmal sind Videos auch schon vor der eigentlichen TV-Ausstrahlung in der Mediathek verfügbar.</p>
+            <label><input v-model="searchInFutureBroadcasts" type="checkbox"> Search Future Broadcasts</label>
+            <p class="field-desc">Sometimes videos are available in the media library before their scheduled TV broadcast.</p>
           </div>
           <div class="grid-2">
             <div class="field">
-              <label class="field-label">Seitengröße (API-Anfragen)</label>
+              <label class="field-label">Page Size (API Requests)</label>
               <input v-model="searchPageSize" type="number" class="field-input" min="1" max="100">
-              <p class="field-desc">Wie viele Ergebnisse pro Seite von der API abgefragt werden.</p>
+              <p class="field-desc">Number of results requested per page from the API.</p>
             </div>
             <div class="field">
-              <label class="field-label">Maximale Seitenanzahl</label>
+              <label class="field-label">Maximum Number of Pages</label>
               <input v-model="searchMaxPages" type="number" class="field-input" min="1" max="100">
-              <p class="field-desc">Maximale Anzahl an Seiten pro Suchanfrage / Abo-Lauf.</p>
+              <p class="field-desc">Maximum number of pages per search/subscription run.</p>
             </div>
           </div>
           <div v-if="searchTotalItems > 0" class="info-msg">
-            Aktuelle Konfiguration: Bis zu <strong>{{ searchTotalItems }}</strong> Medien können pro Suche/Abo-Lauf gefunden werden.
+            Current configuration: Up to <strong>{{ searchTotalItems }}</strong> media items can be found per search/subscription run.
           </div>
         </div>
       </details>
 
       <!-- ===== NETZWERK & SICHERHEIT ===== -->
       <details class="settings-section">
-        <summary class="section-title">Netzwerk &amp; Sicherheit</summary>
+        <summary class="section-title">Network &amp; Security</summary>
         <div class="section-body">
           <div class="checkbox-field">
-            <label><input v-model="allowUnknownDomains" type="checkbox"> Downloads von unbekannten Domains erlauben</label>
-            <p class="field-desc">Ermöglicht das Herunterladen von Inhalten von Domains, die nicht auf der Whitelist stehen. Dies kann nützlich sein, wenn ARD oder ZDF neue CDNs hinzufügen. <strong>Sicherheitsrisiko – mit Vorsicht verwenden.</strong></p>
+            <label><input v-model="allowUnknownDomains" type="checkbox"> Allow Downloads from Unknown Domains</label>
+            <p class="field-desc">Allows downloading content from domains that are not on the whitelist. This can be useful if ARD or ZDF add new CDNs. <strong>Security risk — use with caution.</strong></p>
           </div>
           <div class="checkbox-field">
-            <label><input v-model="allowHttp" type="checkbox"> HTTP Downloads erlauben</label>
-            <p class="field-desc">Dies kann notwendig sein, da manche URLs kein HTTPS unterstützen. Es wird empfohlen, dies deaktiviert zu lassen.</p>
+            <label><input v-model="allowHttp" type="checkbox"> Allow HTTP Downloads</label>
+            <p class="field-desc">This may be necessary because some URLs do not support HTTPS. It is recommended to leave this disabled.</p>
           </div>
         </div>
       </details>
 
       <!-- ===== ABO-STANDARDWERTE ===== -->
       <details class="settings-section">
-        <summary class="section-title">Abo-Standardwerte</summary>
+        <summary class="section-title">Subscription Defaults</summary>
         <div class="section-body">
-          <p class="field-desc" style="margin-bottom:15px;">Diese Werte werden als Standard für neue Abonnements verwendet.</p>
+          <p class="field-desc" style="margin-bottom:15px;">These values are used as defaults for new subscriptions.</p>
 
-          <div class="sub-section-title">Suche</div>
+          <div class="sub-section-title">Search</div>
           <div class="grid-2">
             <div class="field">
-              <label class="field-label">Min. Dauer (Minuten)</label>
-              <input v-model="defMinDuration" type="number" class="field-input" placeholder="Kein Limit">
+              <label class="field-label">Min. Duration (minutes)</label>
+              <input v-model="defMinDuration" type="number" class="field-input" placeholder="No limit">
             </div>
             <div class="field">
-              <label class="field-label">Max. Dauer (Minuten)</label>
-              <input v-model="defMaxDuration" type="number" class="field-input" placeholder="Kein Limit">
+              <label class="field-label">Max. Duration (minutes)</label>
+              <input v-model="defMaxDuration" type="number" class="field-input" placeholder="No limit">
             </div>
           </div>
 
           <div class="sub-section-title">Download</div>
           <div class="checkbox-field">
-            <label><input v-model="defUseStreamingUrlFiles" type="checkbox"> Streaming-URL-Dateien (.strm) verwenden</label>
+            <label><input v-model="defUseStreamingUrlFiles" type="checkbox"> Use streaming URL files (.strm)</label>
           </div>
           <div v-if="!defUseStreamingUrlFiles" class="sub-options">
             <div class="checkbox-field">
-              <label><input v-model="defDownloadFullVideoSecondaryAudio" type="checkbox"> Vollständiges Video für sekundäre Audiosprachen</label>
+              <label><input v-model="defDownloadFullVideoSecondaryAudio" type="checkbox"> Full video for secondary audio languages</label>
             </div>
           </div>
           <div class="checkbox-field">
-            <label><input v-model="defAlwaysCreateSubfolder" type="checkbox"> Unterordner für Abo erstellen</label>
+            <label><input v-model="defAlwaysCreateSubfolder" type="checkbox"> Create subfolder for subscription</label>
           </div>
           <div class="checkbox-field">
-            <label><input v-model="defEnhancedDuplicateDetection" type="checkbox"> Erweiterte Duplikaterkennung</label>
+            <label><input v-model="defEnhancedDuplicateDetection" type="checkbox"> Enhanced Duplicate Detection</label>
           </div>
           <div class="checkbox-field">
-            <label><input v-model="defAllowFallbackToLowerQuality" type="checkbox"> Fallback auf niedrigere Qualität erlauben</label>
+            <label><input v-model="defAllowFallbackToLowerQuality" type="checkbox"> Allow fallback to lower quality</label>
           </div>
           <div v-if="defAllowFallbackToLowerQuality" class="sub-options">
             <div class="checkbox-field">
-              <label><input v-model="defQualityCheckWithUrl" type="checkbox"> URL-Gültigkeit prüfen</label>
+              <label><input v-model="defQualityCheckWithUrl" type="checkbox"> Validate URL</label>
             </div>
           </div>
 
-          <div class="sub-section-title">Serien</div>
+          <div class="sub-section-title">Series</div>
           <div class="checkbox-field">
-            <label><input v-model="defEnforceSeries" type="checkbox"> Nur Serien herunterladen</label>
+            <label><input v-model="defEnforceSeries" type="checkbox"> Download series only</label>
           </div>
           <div v-if="defEnforceSeries" class="sub-options">
             <div class="checkbox-field">
-              <label><input v-model="defAllowAbsoluteEpisodeNumbering" type="checkbox"> Absolute Episodennummerierung erlauben</label>
+              <label><input v-model="defAllowAbsoluteEpisodeNumbering" type="checkbox"> Allow absolute episode numbering</label>
             </div>
           </div>
           <div v-if="!defEnforceSeries">
             <div class="checkbox-field">
-              <label><input v-model="defTreatNonEpisodesAsExtras" type="checkbox"> Nicht-Episoden als Extras behandeln</label>
+              <label><input v-model="defTreatNonEpisodesAsExtras" type="checkbox"> Treat non-episodes as extras</label>
             </div>
             <div v-if="defTreatNonEpisodesAsExtras" class="sub-options">
               <div class="checkbox-field">
-                <label><input v-model="defSaveExtrasAsStrm" type="checkbox"> Extras als Stream (.strm) speichern</label>
+                <label><input v-model="defSaveExtrasAsStrm" type="checkbox"> Save extras as streams (.strm)</label>
               </div>
               <div class="checkbox-field">
-                <label><input v-model="defSaveTrailers" type="checkbox"> Trailer speichern</label>
+                <label><input v-model="defSaveTrailers" type="checkbox"> Save trailers</label>
               </div>
               <div class="checkbox-field">
-                <label><input v-model="defSaveInterviews" type="checkbox"> Interviews speichern</label>
+                <label><input v-model="defSaveInterviews" type="checkbox"> Save interviews</label>
               </div>
               <div class="checkbox-field">
-                <label><input v-model="defSaveGenericExtras" type="checkbox"> Generische Extras speichern</label>
+                <label><input v-model="defSaveGenericExtras" type="checkbox"> Save generic extras</label>
               </div>
             </div>
           </div>
 
-          <div class="sub-section-title">Metadaten</div>
+          <div class="sub-section-title">Metadata</div>
           <div class="field">
-            <label class="field-label">Originalsprache (ISO Code, z.B. 'eng')</label>
-            <input v-model="defOriginalLanguage" type="text" class="field-input" placeholder="z.B. eng oder fra">
+            <label class="field-label">Original Language (ISO code, e.g. 'eng')</label>
+            <input v-model="defOriginalLanguage" type="text" class="field-input" placeholder="e.g. eng or fra">
           </div>
           <div class="checkbox-field">
-            <label><input v-model="defCreateNfo" type="checkbox"> NFO Dateien erstellen</label>
+            <label><input v-model="defCreateNfo" type="checkbox"> Create NFO files</label>
           </div>
           <div class="checkbox-field">
-            <label><input v-model="defAppendDateToTitle" type="checkbox"> Datum an Titel anhängen</label>
+            <label><input v-model="defAppendDateToTitle" type="checkbox"> Append date to title</label>
           </div>
           <div v-if="defAppendDateToTitle" class="sub-options">
             <div class="checkbox-field">
-              <label><input v-model="defAppendTimeToTitle" type="checkbox"> Uhrzeit an Titel anhängen</label>
+              <label><input v-model="defAppendTimeToTitle" type="checkbox"> Append time to title</label>
             </div>
           </div>
           <div class="checkbox-field">
-            <label><input v-model="defKeepOriginalTitle" type="checkbox"> Originaltitel beibehalten</label>
+            <label><input v-model="defKeepOriginalTitle" type="checkbox"> Keep original title</label>
           </div>
 
-          <div class="sub-section-title">Barrierefreiheit</div>
+          <div class="sub-section-title">Accessibility</div>
           <div class="checkbox-field">
-            <label><input v-model="defAllowAudioDesc" type="checkbox"> Audiodeskription erlauben</label>
+            <label><input v-model="defAllowAudioDesc" type="checkbox"> Allow audio description</label>
           </div>
           <div class="checkbox-field">
-            <label><input v-model="defAllowSignLanguage" type="checkbox"> Gebärdensprache erlauben</label>
+            <label><input v-model="defAllowSignLanguage" type="checkbox"> Allow sign language</label>
           </div>
         </div>
       </details>
 
       <!-- ===== WARTUNG ===== -->
       <details class="settings-section">
-        <summary class="section-title">Wartung</summary>
+        <summary class="section-title">Maintenance</summary>
         <div class="section-body">
           <div class="checkbox-field">
-            <label><input v-model="enableStrmCleanup" type="checkbox"> Bereinigung ungültiger Streaming-Dateien (.strm) aktivieren</label>
-            <p class="field-desc">Überprüft regelmäßig alle erstellten .strm Dateien auf Gültigkeit der Links. Wenn ein Link nicht mehr erreichbar ist (z.B. 404), wird die Datei gelöscht.</p>
+            <label><input v-model="enableStrmCleanup" type="checkbox"> Enable cleanup of invalid streaming files (.strm)</label>
+            <p class="field-desc">Regularly validates links in all generated .strm files. If a link is no longer available (e.g. 404), the file is deleted.</p>
           </div>
           <div class="checkbox-field">
-            <label><input v-model="allowDownloadOnUnknownDiskSpace" type="checkbox"> Download bei unbekanntem Speicherplatz erlauben</label>
-            <p class="field-desc">Ermöglicht den Download auch dann, wenn der verfügbare Speicherplatz nicht ermittelt werden kann (z.B. bei manchen Netzwerkfreigaben).</p>
+            <label><input v-model="allowDownloadOnUnknownDiskSpace" type="checkbox"> Allow downloads when disk space is unknown</label>
+            <p class="field-desc">Allows downloads even when available disk space cannot be determined (for example, on some network shares).</p>
           </div>
         </div>
       </details>
@@ -589,25 +589,25 @@ onMounted(() => {
       <details class="settings-section">
         <summary class="section-title">Live TV Integration</summary>
         <div class="section-body">
-          <p class="field-desc">Hier können Sie die Live TV Integration einrichten. Da Jellyfin Plugins nicht automatisch als Guide-Provider anzeigt, können Sie diese hier manuell hinzufügen.</p>
+          <p class="field-desc">Configure the Live TV integration here. Because Jellyfin does not automatically expose plugins as guide providers, you can add them manually here.</p>
           <div class="btn-row">
-            <button type="button" class="btn btn-secondary" @click="setupTuner">Zapp Tuner hinzufügen</button>
-            <button type="button" class="btn btn-secondary" @click="setupGuide">Zapp Guide Provider hinzufügen</button>
+            <button type="button" class="btn btn-secondary" @click="setupTuner">Add Zapp Tuner</button>
+            <button type="button" class="btn btn-secondary" @click="setupGuide">Add Zapp Guide Provider</button>
           </div>
-          <p class="field-desc" style="margin-top:10px;"><strong>Hinweis:</strong> Nach dem Hinzufügen müssen Sie möglicherweise die Seite neu laden oder den Guide-Refresh Task in Jellyfin starten, damit die Daten angezeigt werden.</p>
+          <p class="field-desc" style="margin-top:10px;"><strong>Note:</strong> After adding these providers, you may need to reload the page or run Jellyfin's Guide Refresh task before the data appears.</p>
         </div>
       </details>
 
       <!-- ===== LETZTER LAUF + BUTTONS ===== -->
       <div class="footer-row">
         <div class="last-run">
-          <span class="field-label">Letzter Lauf:</span>
-          <span>{{ lastRun ?? 'Noch nie' }}</span>
+          <span class="field-label">Last Run:</span>
+          <span>{{ lastRun ?? 'Never' }}</span>
         </div>
         <div class="action-row">
-          <button type="button" class="btn btn-secondary btn-sm" @click="copyConfig" title="Konfiguration kopieren">📋 Kopieren</button>
+          <button type="button" class="btn btn-secondary btn-sm" @click="copyConfig" title="Copy configuration">📋 Copy</button>
           <button type="submit" class="btn btn-save" :disabled="saving">
-            {{ saving ? 'Speichert...' : 'Speichern' }}
+            {{ saving ? 'Saving...' : 'Save' }}
           </button>
         </div>
       </div>

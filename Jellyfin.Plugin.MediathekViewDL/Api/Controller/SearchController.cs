@@ -72,7 +72,7 @@ public class SearchController : ControllerBase
             string.IsNullOrWhiteSpace(channel) &&
             string.IsNullOrWhiteSpace(combinedSearch))
         {
-            return BadRequest(new ApiErrorDto(ApiErrorId.InvalidSearch, "Mindestens ein Suchparameter (Titel, Thema, Sender oder kombinierte Suche) muss angegeben werden."));
+            return BadRequest(new ApiErrorDto(ApiErrorId.InvalidSearch, "At least one search parameter (title, topic, channel, or combined search) must be specified."));
         }
 
         try
@@ -95,23 +95,23 @@ public class SearchController : ControllerBase
         catch (MediathekConnectionException ex)
         {
             _logger.LogError(ex, "Connection error while searching.");
-            return StatusCode(503, new ApiErrorDto(ApiErrorId.MediathekUnavailable, "Die MediathekView API ist derzeit nicht erreichbar. Bitte versuchen Sie es später erneut."));
+            return StatusCode(503, new ApiErrorDto(ApiErrorId.MediathekUnavailable, "The MediathekView API is currently unavailable. Please try again later."));
         }
         catch (MediathekParsingException ex)
         {
             _logger.LogError(ex, "Parsing error while searching.");
-            return StatusCode(502, new ApiErrorDto(ApiErrorId.MediathekInvalidResponse, "Ungültige Antwort von der MediathekView API erhalten."));
+            return StatusCode(502, new ApiErrorDto(ApiErrorId.MediathekInvalidResponse, "Received an invalid response from the MediathekView API."));
         }
         catch (MediathekApiException ex)
         {
             _logger.LogError(ex, "API error while searching. Status code: {StatusCode}", ex.StatusCode);
             var statusCode = (int)ex.StatusCode >= 500 ? 502 : 500;
-            return StatusCode(statusCode, new ApiErrorDto(ApiErrorId.MediathekApiError, $"Die MediathekView API hat einen Fehler zurückgegeben ({ex.StatusCode})."));
+            return StatusCode(statusCode, new ApiErrorDto(ApiErrorId.MediathekApiError, $"The MediathekView API returned an error ({ex.StatusCode})."));
         }
         catch (MediathekException ex)
         {
             _logger.LogError(ex, "An error occurred while searching.");
-            return StatusCode(500, new ApiErrorDto(ApiErrorId.MediathekError, "Ein unerwarteter Fehler ist beim Aufruf der MediathekView API aufgetreten."));
+            return StatusCode(500, new ApiErrorDto(ApiErrorId.MediathekError, "An unexpected error occurred while calling the MediathekView API."));
         }
     }
 
@@ -132,7 +132,7 @@ public class SearchController : ControllerBase
         catch (MediathekException ex)
         {
             _logger.LogError(ex, "Error while getting channels.");
-            return StatusCode(502, new ApiErrorDto(ApiErrorId.MediathekApiError, "Fehler beim Abrufen der Senderliste von der MediathekView API."));
+            return StatusCode(502, new ApiErrorDto(ApiErrorId.MediathekApiError, "Failed to retrieve the channel list from the MediathekView API."));
         }
     }
 
@@ -153,7 +153,7 @@ public class SearchController : ControllerBase
         catch (MediathekException ex)
         {
             _logger.LogError(ex, "Error while getting topics.");
-            return StatusCode(502, new ApiErrorDto(ApiErrorId.MediathekApiError, "Fehler beim Abrufen der Themenliste von der MediathekView API."));
+            return StatusCode(502, new ApiErrorDto(ApiErrorId.MediathekApiError, "Failed to retrieve the topic list from the MediathekView API."));
         }
     }
 

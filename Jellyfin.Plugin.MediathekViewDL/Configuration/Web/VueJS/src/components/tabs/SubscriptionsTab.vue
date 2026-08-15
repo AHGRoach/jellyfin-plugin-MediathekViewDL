@@ -18,7 +18,7 @@ async function fetchSubscriptions() {
   try {
     subscriptions.value = await ApiService.getSubscriptions()
   } catch (e) {
-    error.value = 'Fehler beim Laden der Abonnements.'
+    error.value = 'Failed to load subscriptions.'
     console.error('Failed to fetch subscriptions', e)
   } finally {
     loading.value = false
@@ -27,15 +27,15 @@ async function fetchSubscriptions() {
 
 async function deleteSubscription(id) {
   if (!Dashboard) return
-  Dashboard.confirm('Soll dieses Abonnement wirklich gelöscht werden?', 'Löschen bestätigen', async (result) => {
+  Dashboard.confirm('Are you sure you want to delete this subscription?', 'Confirm Delete', async (result) => {
     if (result) {
       try {
         await ApiService.deleteSubscription(id)
         await fetchSubscriptions()
-        Dashboard.alert('Abonnement gelöscht.')
+        Dashboard.alert('Subscription deleted.')
       } catch (e) {
         console.error('Delete failed', e)
-        Dashboard.alert('Fehler beim Löschen des Abonnements.')
+        Dashboard.alert('Failed to delete the subscription.')
       }
     }
   })
@@ -43,15 +43,15 @@ async function deleteSubscription(id) {
 
 async function resetProcessedItems(id) {
   if (!Dashboard) return
-  Dashboard.confirm('Soll der Verlauf der bereits verarbeiteten Elemente für dieses Abonnement wirklich zurückgesetzt werden?', 'Zurücksetzen bestätigen', async (result) => {
+  Dashboard.confirm('Are you sure you want to reset the processed-item history for this subscription?', 'Confirm Reset', async (result) => {
     if (result) {
       try {
         await ApiService.resetSubscriptionHistory(id)
-        Dashboard.alert('Verlauf wurde zurückgesetzt.')
+        Dashboard.alert('History has been reset.')
         await fetchSubscriptions()
       } catch (e) {
         console.error('Reset failed', e)
-        Dashboard.alert('Fehler beim Zurücksetzen.')
+        Dashboard.alert('Failed to reset history.')
       }
     }
   })
@@ -61,10 +61,10 @@ async function processSubscription(id) {
   if (!Dashboard) return
   try {
     const response = await ApiService.processSubscription(id)
-    Dashboard.alert(response + ' neue Elemente gefunden.')
+    Dashboard.alert(response + ' new items found.')
   } catch (e) {
     console.error('Processing failed', e)
-    Dashboard.alert('Fehler beim Verarbeiten.')
+    Dashboard.alert('Failed to process the subscription.')
   }
 }
 
@@ -75,7 +75,7 @@ async function toggleActive(sub) {
     sub.IsEnabled = result === true || result === 'true'
   } catch (e) {
     console.error('Toggle failed', e)
-    if (Dashboard) Dashboard.alert('Fehler beim Ändern des Status.')
+    if (Dashboard) Dashboard.alert('Failed to change subscription status.')
   }
 }
 
@@ -87,21 +87,21 @@ async function triggerDownloads() {
     const task = tasks.find(t => t.Key === 'MediathekViewDL-MediathekAboDownloader')
 
     if (!task) {
-      Dashboard.alert('Scheduled Task "Mediathek Abo-Downloader" wurde nicht gefunden.')
+      Dashboard.alert('Scheduled task "Mediathek Subscription Downloader" was not found.')
       return
     }
 
     if (task.State !== 'Idle') {
-      Dashboard.alert('Der Abo-Downloader läuft bereits.')
+      Dashboard.alert('The subscription downloader is already running.')
       return
     }
 
     await ApiService.startScheduledTask(task.Id)
 
-    Dashboard.alert('Download-Task wurde gestartet.')
+    Dashboard.alert('Download task started.')
   } catch (e) {
     console.error('Failed to trigger downloads', e)
-    Dashboard.alert('Fehler beim Starten des Download-Tasks.')
+    Dashboard.alert('Failed to start the download task.')
   } finally {
     loading.value = false
   }
@@ -118,27 +118,27 @@ defineExpose({ refresh: fetchSubscriptions })
 <template>
   <div class="card">
     <div class="header-row">
-      <h2>Abo Verwaltung</h2>
+      <h2>Subscription Management</h2>
       <div class="header-actions">
-        <button class="btn btn-secondary" @click="triggerDownloads" :disabled="loading">Downloads manuell starten</button>
-        <button class="btn btn-primary" @click="onEdit()" :disabled="loading">Neues Abo</button>
+        <button class="btn btn-secondary" @click="triggerDownloads" :disabled="loading">Start Downloads Manually</button>
+        <button class="btn btn-primary" @click="onEdit()" :disabled="loading">New Subscription</button>
       </div>
     </div>
 
     <div v-if="loading" class="state-msg">
       <div class="spinner"></div>
-      Lade Abonnements...
+      Loading subscriptions...
     </div>
 
     <div v-else-if="error" class="error-container">
       <div class="error-msg">{{ error }}</div>
-      <button @click="fetchSubscriptions" class="btn btn-secondary">Erneut versuchen</button>
+      <button @click="fetchSubscriptions" class="btn btn-secondary">Try Again</button>
     </div>
 
     <div v-else-if="subscriptions.length > 0" class="subscriptions-list">
       <div v-for="sub in subscriptions" :key="sub.Id" class="subscription-item" :class="{ disabled: !sub.IsEnabled }">
         <div class="sub-left">
-          <label class="switch" title="Abonnement aktivieren/deaktivieren">
+          <label class="switch" title="Enable/disable subscription">
             <input type="checkbox" :checked="sub.IsEnabled" @change="toggleActive(sub)">
             <span class="slider round"></span>
           </label>
@@ -148,21 +148,21 @@ defineExpose({ refresh: fetchSubscriptions })
               {{ sub.Name }}
             </div>
             <div class="sub-meta">
-              Letzter Download: {{ sub.LastDownloadedTimestamp ? new Date(sub.LastDownloadedTimestamp).toLocaleString() : 'Nie' }}
+              Last Download: {{ sub.LastDownloadedTimestamp ? new Date(sub.LastDownloadedTimestamp).toLocaleString() : 'Never' }}
             </div>
           </div>
         </div>
         <div class="sub-actions">
-          <button @click="resetProcessedItems(sub.Id)" class="btn-icon" title="Verlauf zurücksetzen">↩️</button>
-          <button @click="processSubscription(sub.Id)" class="btn-icon" title="Jetzt verarbeiten">🔄</button>
-          <button @click="onEdit(sub)" class="btn-icon" title="Bearbeiten">✏️</button>
-          <button @click="deleteSubscription(sub.Id)" class="btn-icon btn-delete" title="Löschen">🗑️</button>
+          <button @click="resetProcessedItems(sub.Id)" class="btn-icon" title="Reset history">↩️</button>
+          <button @click="processSubscription(sub.Id)" class="btn-icon" title="Process now">🔄</button>
+          <button @click="onEdit(sub)" class="btn-icon" title="Edit">✏️</button>
+          <button @click="deleteSubscription(sub.Id)" class="btn-icon btn-delete" title="Delete">🗑️</button>
         </div>
       </div>
     </div>
 
     <div v-else class="no-data">
-      Keine Abonnements konfiguriert.
+      No subscriptions configured.
     </div>
   </div>
 </template>

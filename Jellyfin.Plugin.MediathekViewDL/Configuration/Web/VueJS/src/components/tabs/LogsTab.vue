@@ -47,7 +47,7 @@ const filteredEntries = computed(() => {
       const re = new RegExp(q, 'i')
       return entries.filter(entry => re.test(entry.text))
     } catch (e) {
-      searchError.value = 'Ungültiger Regex: ' + e.message
+      searchError.value = 'Invalid regular expression: ' + e.message
       return entries
     }
   }
@@ -113,7 +113,7 @@ async function fetchLogFiles() {
     }
   } catch (e) {
     console.error('Failed to fetch log files', e)
-    error.value = 'Fehler beim Laden der Log-Dateien. Möglicherweise fehlen Admin-Rechte.'
+    error.value = 'Failed to load log files. Administrator permissions may be required.'
   } finally {
     loadingFiles.value = false
   }
@@ -130,7 +130,7 @@ async function fetchLogContent() {
     if (autoScroll.value) scrollToBottom()
   } catch (e) {
     console.error('Failed to fetch log content', e)
-    error.value = 'Fehler beim Laden des Log-Inhalts.'
+    error.value = 'Failed to load log content.'
   } finally {
     loading.value = false
   }
@@ -157,13 +157,13 @@ async function copyFilteredLogs() {
   try {
     if (window.isSecureContext) {
       await navigator.clipboard.writeText(text)
-      if (Dashboard) Dashboard.alert('Logs in die Zwischenablage kopiert.')
+      if (Dashboard) Dashboard.alert('Logs copied to the clipboard.')
     } else {
-      prompt('Bitte manuell kopieren:', text)
+      prompt('Copy manually:', text)
     }
   } catch (e) {
     console.error('Failed to copy logs', e)
-    prompt('Bitte manuell kopieren:', text)
+    prompt('Copy manually:', text)
   }
 }
 
@@ -173,12 +173,12 @@ async function copyEntry(entry, idx) {
       await navigator.clipboard.writeText(entry.text)
       copiedEntryIdx.value = idx
       setTimeout(() => { copiedEntryIdx.value = -1 }, 1500)
-      if (Dashboard) Dashboard.alert('Eintrag kopiert.')
+      if (Dashboard) Dashboard.alert('Entry copied.')
     } else {
-      prompt('Bitte manuell kopieren:', entry.text)
+      prompt('Copy manually:', entry.text)
     }
   } catch (e) {
-    prompt('Bitte manuell kopieren:', entry.text)
+    prompt('Copy manually:', entry.text)
   }
 }
 
@@ -214,19 +214,19 @@ onUnmounted(() => {
         <div class="header-actions">
           <button class="btn btn-secondary btn-sm" @click="refresh" :disabled="loading || !selectedFile">
             <span v-if="loading" class="spinner-sm"></span>
-            Aktualisieren
+            Refresh
           </button>
           <button class="btn btn-secondary btn-sm" @click="copyFilteredLogs" :disabled="filteredEntries.length === 0">
-            Kopieren
+            Copy
           </button>
         </div>
       </div>
 
       <div class="controls-row">
         <div class="field log-file-select">
-          <label class="field-label" for="log-file-select">Log-Datei</label>
+          <label class="field-label" for="log-file-select">Log File</label>
           <select id="log-file-select" class="field-select" v-model="selectedFile" :disabled="loadingFiles">
-            <option v-if="loadingFiles" value="" disabled>Lade Dateien...</option>
+            <option v-if="loadingFiles" value="" disabled>Loading files...</option>
             <option v-for="file in logFiles" :key="file.Name" :value="file.Name">
               {{ file.Name }} ({{ formatFileSize(file.Size) }}, {{ formatDate(file.DateModified) }})
             </option>
@@ -236,7 +236,7 @@ onUnmounted(() => {
         <div class="filter-toggles">
           <label class="checkbox-field">
             <input type="checkbox" v-model="filterPluginOnly" />
-            <span>Nur MediathekViewDL</span>
+            <span>MediathekViewDL only</span>
           </label>
           <label class="checkbox-field">
             <input type="checkbox" v-model="autoScroll" />
@@ -256,39 +256,39 @@ onUnmounted(() => {
             class="field-input"
             :class="{ 'field-input-error': searchError }"
             v-model="searchQuery"
-            placeholder="Suchen..."
+            placeholder="Search..."
           />
           <button
             v-if="searchQuery"
             class="btn-icon search-clear"
             @click="searchQuery = ''"
-            title="Suche löschen"
+            title="Clear search"
           >✕</button>
         </div>
         <label class="checkbox-field">
           <input type="checkbox" v-model="searchRegex" />
           <span>Regex</span>
         </label>
-        <span class="entry-count">{{ filteredEntries.length }} Einträge</span>
+        <span class="entry-count">{{ filteredEntries.length }} entries</span>
       </div>
       <div v-if="searchError" class="search-error">{{ searchError }}</div>
 
       <div v-if="loadingFiles" class="state-msg">
         <div class="spinner"></div>
-        Lade Log-Dateien...
+        Loading log files...
       </div>
       <div v-else-if="error" class="error-msg">
         {{ error }}
       </div>
       <div v-else-if="logFiles.length === 0" class="no-data">
-        Keine Log-Dateien gefunden.
+        No log files found.
       </div>
       <div v-else-if="loading && !rawContent" class="state-msg">
         <div class="spinner"></div>
-        Lade Log-Inhalt...
+        Loading log content...
       </div>
       <div v-else-if="filteredEntries.length === 0" class="no-data">
-        {{ rawContent ? 'Keine passenden Log-Einträge gefunden.' : 'Log-Datei ist leer.' }}
+        {{ rawContent ? 'No matching log entries found.' : 'Log file is empty.' }}
       </div>
       <div v-else ref="logContainer" class="log-content">
         <div
@@ -296,7 +296,7 @@ onUnmounted(() => {
           :key="idx"
           :class="['log-entry', entry.levelClass, { 'entry-copied': copiedEntryIdx === idx }]"
           @dblclick="copyEntry(entry, idx)"
-          title="Doppelklick zum Kopieren"
+          title="Double-click to copy"
         >
           <template v-for="(line, lIdx) in entry.lines" :key="lIdx">
             <div class="log-line"><span v-if="lIdx > 0" class="log-continuation"></span>{{ line }}</div>

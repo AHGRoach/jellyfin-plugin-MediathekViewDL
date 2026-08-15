@@ -82,7 +82,7 @@ public class DownloadManager : IDownloadManager
                         DestinationPath = item.DestinationPath,
                         JobType = item.JobType,
                         Success = false,
-                        ErrorMessage = $"Ungültige URL: {item.SourceUrl}"
+                        ErrorMessage = $"Invalid URL: {item.SourceUrl}"
                     });
                     continue;
                 }
@@ -145,7 +145,7 @@ public class DownloadManager : IDownloadManager
                     DestinationPath = item.DestinationPath,
                     JobType = item.JobType,
                     Success = false,
-                    ErrorMessage = $"Kein Handler für Typ '{item.JobType}' gefunden"
+                    ErrorMessage = $"No handler found for type '{item.JobType}' gefunden"
                 });
             }
         }

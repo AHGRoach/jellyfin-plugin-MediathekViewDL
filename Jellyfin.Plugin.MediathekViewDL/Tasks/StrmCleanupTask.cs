@@ -36,7 +36,7 @@ public class StrmCleanupTask : IScheduledTask
     }
 
     /// <inheritdoc />
-    public string Name => "Mediathek .strm Bereinigung";
+    public string Name => "Mediathek .strm Cleanup";
 
     /// <inheritdoc />
     public string Key => "MediathekStrmCleanup";
@@ -45,7 +45,7 @@ public class StrmCleanupTask : IScheduledTask
     public string Category => "Mediathek Downloader";
 
     /// <inheritdoc />
-    public string Description => "Überprüft .strm Dateien auf Gültigkeit und löscht verwaiste Links.";
+    public string Description => "Validates .strm files and removes orphaned or invalid links.";
 
     /// <inheritdoc />
     public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()

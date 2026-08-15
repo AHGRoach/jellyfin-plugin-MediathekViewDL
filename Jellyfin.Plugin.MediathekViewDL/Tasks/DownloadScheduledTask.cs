@@ -40,7 +40,7 @@ public class DownloadScheduledTask : IScheduledTask
     }
 
     /// <inheritdoc />
-    public string Name => "Mediathek Abo-Downloader";
+    public string Name => "Mediathek Subscription Downloader";
 
     /// <inheritdoc />
     public string Key => Constants.GetSchedTaskKey("MediathekAboDownloader");
@@ -49,7 +49,7 @@ public class DownloadScheduledTask : IScheduledTask
     public string Category => "Mediathek Downloader";
 
     /// <inheritdoc />
-    public string Description => "Sucht nach neuen Inhalten für Abonnements und fügt sie der Download-Warteschlange hinzu.";
+    public string Description => "Searches for new subscription content and adds it to the download queue.";
 
     /// <inheritdoc />
     public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()

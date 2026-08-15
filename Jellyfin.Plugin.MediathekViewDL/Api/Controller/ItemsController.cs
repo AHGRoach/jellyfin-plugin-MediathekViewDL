@@ -88,7 +88,7 @@ public class ItemsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Could not create RecommendedPaths for: {VideoInfo}", videoInfo);
-            return BadRequest(new ApiErrorDto(ApiErrorId.InvalidPath, "Empfohlene Pfade konnten nicht erstellt werden."));
+            return BadRequest(new ApiErrorDto(ApiErrorId.InvalidPath, "Recommended paths could not be generated."));
         }
     }
 }
